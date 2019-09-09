@@ -1,6 +1,7 @@
 # Parrot Sequoia access information
 
 Information on accessing the Parrot Sequoia. Use Linux to access most easily.
+
 I NEED HELP with forcing a firmware downgrade
 
 ## Network map
@@ -39,6 +40,12 @@ You are now root on the Sequoia with full write permissions on the built-in Sequ
 ## Firmware downgrade
 
 I NEED HELP WITH THIS. I have no clue how to do it.
+
+The following commands trigger a firmware update (but not a downgrade)
+```bash
+pinst_trigger 1
+reboot; exit
+```
 
 ## How to
 
