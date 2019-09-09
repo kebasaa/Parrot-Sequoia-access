@@ -1,5 +1,7 @@
 # Parrot Sequoia access information
- Information on accessing the Parrot Sequoia. Use Linux to access most easily.
+
+Information on accessing the Parrot Sequoia. Use Linux to access most easily.
+I NEED HELP with forcing a firmware downgrade
 
 ## Network map
 The Parrot Sequoia is accessible through wifi on 192.168.47.1 and through USB on 10.1.1.2.
@@ -36,7 +38,7 @@ You are now root on the Sequoia with full write permissions on the built-in Sequ
 
 ## Firmware downgrade
 
-
+I NEED HELP WITH THIS. I have no clue how to do it.
 
 ## How to
 
