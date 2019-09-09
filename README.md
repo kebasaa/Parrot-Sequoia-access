@@ -1,8 +1,8 @@
-# Parrot-Sequoia-access
+# Parrot Sequoia access information
  Information on accessing the Parrot Sequoia. Use Linux to access most easily.
 
 ## Network map
-The ParrotSequoia is accssible through wifi on 192.168.47.1 and through USB on 10.1.1.2.
+The Parrot Sequoia is accessible through wifi on 192.168.47.1 and through USB on 10.1.1.2.
 
 * Open ports on WIFI
   * 21 FTP (for data access)
