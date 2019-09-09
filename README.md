@@ -4,13 +4,13 @@
 ## Network map
 The Parrot Sequoia is accessible through wifi on 192.168.47.1 and through USB on 10.1.1.2.
 
-* Open ports on WIFI
+* Open ports on WIFI (192.168.47.1)
   * 21 FTP (for data access)
   * 22 SSH (requires an unknown root password)
   * 80 HTTP interface (to control the camera)
   * 53 (unknown purpose)
   * 9050 ADB shell
-* Open ports on USB
+* Open ports on USB (10.1.1.2)
   * 21 FTP (for data access)
   * 22 SSH (requires an unknown root password)
   * 80 HTTP interface (to control the camera)
@@ -38,7 +38,7 @@ You are now root on the Sequoia with full write permissions.
 
 Still needs to be figured out
 
-## How to find the relevant information
+## How to
 
 ### Scanning with NMap
 
@@ -55,3 +55,6 @@ ifconfig
 nmap -NP 10.1.1.2
 ```
 
+### Boot loader access
+
+I currently don't know how to access the boot loader exactly, or whether it's even relevant. However, it appears that the Sequoia will boot into an android-style bootloader if the button is pressed while the device gets powered on.
