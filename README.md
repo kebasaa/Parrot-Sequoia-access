@@ -32,11 +32,11 @@ adb shell mount -o remount,rw /
 adb shell
 ```
 
-You are now root on the Sequoia with full write permissions.
+You are now root on the Sequoia with full write permissions on the built-in Sequoia shell (Ash)
 
 ## Firmware downgrade
 
-Still needs to be figured out
+
 
 ## How to
 
@@ -54,6 +54,10 @@ Assuming that NMap yielded 10.1.1.2 for the IP address, scan the device with
 ifconfig
 nmap -NP 10.1.1.2
 ```
+
+### Information on firmwares
+
+* Firmware 1.7.1 uses BusyBox 1.25.0
 
 ### Boot loader access
 
