@@ -14,17 +14,17 @@ I NEED HELP with forcing a firmware downgrade
 ## Network map
 The Parrot Sequoia is accessible through wifi on 192.168.47.1 and through USB on 10.1.1.2.
 
-* Open ports on WIFI (192.168.47.1)
-  * 21 FTP (for data access)
-  * 22 SSH (requires an unknown root password)
-  * 80 HTTP interface (to control the camera)
-  * 53 (unknown purpose)
-  * 9050 ADB shell
-* Open ports on USB (10.1.1.2)
-  * 21 FTP (for data access)
-  * 22 SSH (requires an unknown root password)
-  * 80 HTTP interface (to control the camera)
-  * 9050 ADB shell
+- Open ports on WIFI (192.168.47.1)
+  - 21 FTP (for data access)
+  - 22 SSH (requires an unknown root password, see below how to change it)
+  - 80 HTTP interface (to control the camera)
+  - 53 (unknown purpose)
+  - 9050 ADB shell
+- Open ports on USB (10.1.1.2)
+  - 21 FTP (for data access)
+  - 22 SSH (requires an unknown root password, see below how to change it)
+  - 80 HTTP interface (to control the camera)
+  - 9050 ADB shell
 
 ## Install ADB
 
@@ -84,7 +84,7 @@ nmap -NP 10.1.1.2
 
 ### Information on firmwares
 
-* Firmware 1.7.1 uses BusyBox 1.25.0
+- Firmware 1.7.1 uses BusyBox 1.25.0
 
 ### Boot loader access
 
