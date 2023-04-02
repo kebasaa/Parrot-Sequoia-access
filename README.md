@@ -67,6 +67,7 @@ reboot; exit
 ## Hardware documentation
 
 - All hardware documentation is available at [Parrot's support website](https://www.parrot.com/en/support/documentation/sequoia).
+- Parrot has a [Sequoia-specific forum](https://forum.developer.parrot.com/c/other-products/sequoia/15)
 - The PTP protocol is documented at (unavailable)
 
 ## How to
