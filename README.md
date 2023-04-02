@@ -64,6 +64,11 @@ pinst_trigger 1
 reboot; exit
 ```
 
+## Hardware documentation
+
+- All hardware documentation is available at [Parrot's support website](https://www.parrot.com/en/support/documentation/sequoia).
+- The PTP protocol is documented at (unavailable)
+
 ## How to
 
 ### Scanning with NMap
