@@ -2,6 +2,13 @@
 
 Information on accessing the Parrot Sequoia. Use Linux to access most easily.
 
+## Hardware reset
+
+Push the button twice shortly and then once very long (10-20 sec).
+This does reset the campera for me, but does not change anything. Parrot support claims that this means you may have to replace the camera. This repository is to try to fix it, as replacing the camera is expensive after the warranty runs out (2 years).
+
+# Firmware downgrade
+
 I NEED HELP with forcing a firmware downgrade
 
 ## Network map
@@ -36,6 +43,17 @@ adb shell
 ```
 
 You are now root on the Sequoia with full write permissions on the built-in Sequoia shell (Ash)
+
+You can now change the root password, which will give you SSH access:
+
+```bash
+passwd
+```
+
+Then, in a new shell, through wifi:
+```bash
+ssh -o HostKeyAlgorithms=+ssh-rsa root@192.168.47.1
+```
 
 ## Firmware downgrade
 
