@@ -42,15 +42,14 @@ adb shell mount -o remount,rw /
 adb shell
 ```
 
-You are now root on the Sequoia with full write permissions on the built-in Sequoia shell (Ash)
-
-You can now change the root password, which will give you SSH access:
+You are now root on the Sequoia with full write permissions on the built-in Sequoia shell (Ash). You can now change the root password, which will give you SSH access:
 
 ```bash
 passwd
 ```
 
-Then, in a new shell, through wifi:
+Then, in a new shell, through connect through SSH:
+
 ```bash
 ssh -o HostKeyAlgorithms=+ssh-rsa root@192.168.47.1
 ```
