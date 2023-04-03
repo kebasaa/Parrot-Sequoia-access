@@ -82,6 +82,7 @@ reboot; exit
   
 - Get into P7 mode: Keep the button pressed while connecting to USB (power)
   - It may be possible to do a USB firmware downgrade using a tool called *milos_linux_installer*, see [some information here](https://forum.developer.parrot.com/t/hardware-malfunction/8164/7)
+  - A further discussion is happening on the [Arducopter forums](https://discuss.ardupilot.org/t/bebop2-flashing/35116/14)
 
 
 ## How to
