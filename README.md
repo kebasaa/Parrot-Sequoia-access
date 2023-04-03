@@ -54,6 +54,7 @@ Then, in a new shell, through connect through SSH:
 ssh -o HostKeyAlgorithms=+ssh-rsa root@192.168.47.1
 ```
 
+
 ## Firmware downgrade
 
 I NEED HELP WITH THIS. I have no clue how to do it.
@@ -68,7 +69,20 @@ reboot; exit
 
 - All hardware documentation is available at [Parrot's support website](https://www.parrot.com/en/support/documentation/sequoia).
 - Parrot has a [Sequoia-specific forum](https://forum.developer.parrot.com/c/other-products/sequoia/15)
-- The PTP protocol is documented at (unavailable)
+- A [Python implementation of the PTP protocol for the Parrot Sequoia](https://github.com/Parrot-Developers/sequoia-ptpy)
+- Some information is available on the [Pix4D website](https://www.pix4d.com/product/sequoia/faq/)
+
+### Things to attempt:
+
+- A Youtube user shows how [to downgrade the firmware on his Parrot BeBop](https://www.youtube.com/watch?v=xzqOPS_nmi0). Maybe the process is similar for the Sequoia:
+  - Connect to the Sequoia via adb or SSH
+  - `vi version.txt`
+  - Reduce the version number & save
+  - Restart, then apply the firmware "update"
+  
+- Get into P7 mode: Keep the button pressed while connecting to USB (power)
+  - It may be possible to do a USB firmware downgrade using a tool called *milos_linux_installer*, see [some information here](https://forum.developer.parrot.com/t/hardware-malfunction/8164/7)
+
 
 ## How to
 
