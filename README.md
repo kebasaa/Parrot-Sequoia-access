@@ -71,6 +71,7 @@ reboot; exit
 - Parrot has a [Sequoia-specific forum](https://forum.developer.parrot.com/c/other-products/sequoia/15)
 - A [Python implementation of the PTP protocol for the Parrot Sequoia](https://github.com/Parrot-Developers/sequoia-ptpy)
 - Some information is available on the [Pix4D website](https://www.pix4d.com/product/sequoia/faq/)
+- [Some information](https://ardupilot.org/dev/docs/building-for-bebop-2.html#building-for-bebop-2) on the [linux tools](https://firmware.parrot.com/Toolchains/parrot-tools-linuxgnutools-2016.02-linaro_1.0.0-5_amd64.deb) for the BeBop2
 
 ### Things to attempt:
 
