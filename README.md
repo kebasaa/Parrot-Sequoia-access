@@ -5,7 +5,24 @@ Information on accessing the Parrot Sequoia. Use Linux to access most easily.
 ## Hardware reset
 
 Push the button twice shortly and then once very long (10-20 sec).
-This does reset the campera for me, but does not change anything. Parrot support claims that this means you may have to replace the camera. This repository is to try to fix it, as replacing the camera is expensive after the warranty runs out (2 years).
+This does reset the camera for me, but does not change anything. Parrot support claims that this means you may have to replace the camera. This repository is to try to fix it, as replacing the camera is expensive after the warranty runs out (2 years).
+
+# Access to the RS232/UART interface
+
+Materials:
+- USB-to-UART/RS232 bridge device
+- Torx 5 or 6 screwdriver
+- Wiring
+
+Steps:
+1) Disassemble the Parrot Sequoia (see disassembly photos)
+2) Connect GND to GND
+3) Connect RX to TX, and TX to RX
+4) Reassemble the Sequoia outside of its casing.
+5) Connect your USB-to-UART/RS232 bridge. On Windows, check which COM port it creates.
+6) Open Putty (https://www.putty.org/), select Serial and for speed a Baud rate of 115200
+7) If you want to log the outputs, select "Session -> Logging", and select your desired file name
+8) Connect the Sequoia to USB for power. *IMPORTANT:* Connect it to the same device as the USB-to-UART/RS232 bridge, otherwise the power circuit could get fried
 
 # Firmware downgrade
 
