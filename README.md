@@ -57,9 +57,15 @@ If the Linux computer does not connect, give it an ip address (you may need to d
 ifconfig usb0 10.1.1.7
 ```
 
-### Enable Telnet
+You should now be able to connect through the methods below.
 
+### File system write access
 
+To gain write access to configuration files:
+
+```bash
+mount  -o remount,rw /
+```
 
 ### ADB
 
@@ -81,6 +87,28 @@ adb shell
 
 You are now root on the Sequoia with full write permissions on the built-in Sequoia shell (Ash).
 
+### Enable Telnet
+
+You can enable Telnet by editing `/etc/boxinit.d/80-telnet.rc`:
+
+```bash
+vi /etc/boxinit.d/80-telnet.rc
+```
+
+Change the third line to enabled:
+
+```bash
+service telnetd /usr/sbin/telnetd -F -l /usr/bin/shl
+    class main
+	enabled
+```
+
+Now `reboot` the Sequoia, and then:
+
+```bash
+telnet 10.1.1.2
+```
+
 ### SSH
 
 Use ADB or Telnet to access the shell. You can now change the root password, which will give you SSH access. **WARNING:** Some processes will not work if a root password is set. Do this at your own risk:
@@ -89,11 +117,30 @@ Use ADB or Telnet to access the shell. You can now change the root password, whi
 passwd
 ```
 
-Then, in a new shell, connect through SSH:
+Then, in a new shell, connect through SSH (example using wifi IP address):
 
 ```bash
 ssh -o HostKeyAlgorithms=+ssh-rsa root@192.168.47.1
 ```
+
+In order to reset the root password to nothing, edit the `/etc/passwd` file and set the password to `x`
+
+```bash
+vi /etc/passwd
+```
+
+## Commands
+
+Shutdown:
+```bash
+sprop sys.poweroff 1
+```
+
+Factory reset:
+```bash
+/usr/bin/factory_reset_or_shutdown.sh reset
+```
+
 
 ## Firmware downgrade
 
