@@ -24,7 +24,7 @@ Steps:
 7) If you want to log the outputs, select "Session -> Logging", and select your desired file name
 8) Connect the Sequoia to USB for power. *IMPORTANT:* Connect it to the same device as the USB-to-UART/RS232 bridge, otherwise the power circuit could get fried
 
-![](Disassembly/007.jpg?raw=true)
+![](Disassembly/007.JPG?raw=true)
 
 # Firmware downgrade
 
