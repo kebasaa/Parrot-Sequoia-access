@@ -11,7 +11,7 @@ This does reset the camera for me, but does not change anything. Parrot support 
 
 Materials:
 - USB-to-UART/RS232 bridge device
-- Torx 5 or 6 screwdriver
+- Torx 6 screwdriver
 - Wiring
 
 Steps:
@@ -25,6 +25,7 @@ Steps:
 8) Connect the Sequoia to USB for power. *IMPORTANT:* Connect it to the same device as the USB-to-UART/RS232 bridge, otherwise the power circuit could get fried
 
 ![](Disassembly/007.JPG?raw=true)
+*Wiring for RS232/UART interface on Parrot Sequoia main board*
 
 # Firmware downgrade
 
