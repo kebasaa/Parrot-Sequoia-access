@@ -7,7 +7,7 @@ Information on accessing the Parrot Sequoia. Use Linux to access most easily.
 Push the button twice shortly and then once very long (10-20 sec).
 This does reset the camera for me, but does not change anything. Parrot support claims that this means you may have to replace the camera. This repository is to try to fix it, as replacing the camera is expensive after the warranty runs out (2 years).
 
-# Access to the RS232/UART interface
+# RS232/UART interface logging of boot information
 
 Materials:
 - USB-to-UART/RS232 bridge device
@@ -28,12 +28,6 @@ Steps:
 
 *Wiring for RS232/UART interface on Parrot Sequoia main board*
 
-# Firmware downgrade
-
-The Parrot Sequoia checks the firmware version of files that are placed in its memory. If the firmware is the same or lower than that already installed, the firmware file will be deleted and nothing happens.
-
-At this point, doing a firmware downgrade does not seem possible. If anyone has information on this, I would appreciate it.
-
 ## Network map
 The Parrot Sequoia is accessible through wifi on 192.168.47.1 and through USB on 10.1.1.2.
 
@@ -49,13 +43,19 @@ The Parrot Sequoia is accessible through wifi on 192.168.47.1 and through USB on
   - 80 HTTP interface (to control the camera)
   - 9050 ADB shell
 
-## Install ADB
+## Software access
+
+### Enable Telnet
+
+### ADB
 
 On a Linux computer (ideally a Ubuntu or similar distribution):
 
 ```bash
 sudo apt-get update
 sudo apt-get install android-tools-adb
+OR:
+sudo apt-get install adb
 ```
 
 Then you can log conntect to the Sequoia and remount the root partition to write onto with
@@ -65,24 +65,29 @@ adb shell mount -o remount,rw /
 adb shell
 ```
 
-You are now root on the Sequoia with full write permissions on the built-in Sequoia shell (Ash). You can now change the root password, which will give you SSH access:
+You are now root on the Sequoia with full write permissions on the built-in Sequoia shell (Ash).
+
+### SSH
+
+Use ADB or Telnet to access the shell. You can now change the root password, which will give you SSH access. **WARNING:** Some processes will not work if a root password is set. Do this at your own risk:
 
 ```bash
 passwd
 ```
 
-Then, in a new shell, through connect through SSH:
+Then, in a new shell, connect through SSH:
 
 ```bash
 ssh -o HostKeyAlgorithms=+ssh-rsa root@192.168.47.1
 ```
 
-
 ## Firmware downgrade
 
-I NEED HELP WITH THIS. I have no clue how to do it.
+The Parrot Sequoia checks the firmware version of files that are placed in its memory. If the firmware is the same or lower than that already installed, the firmware file will be deleted and nothing happens.
 
-The following commands trigger a firmware update (but not a downgrade)
+At this point, doing a firmware downgrade does not seem possible. If anyone has information on this, I would appreciate it.
+
+*NOTE:* The following commands trigger a firmware update (but not a downgrade)
 ```bash
 pinst_trigger 1
 reboot; exit
