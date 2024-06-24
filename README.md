@@ -105,7 +105,7 @@ Change the third line to enabled:
 ```bash
 service telnetd /usr/sbin/telnetd -F -l /usr/bin/shl
     class main
-	enabled
+    enabled
 ```
 
 Now `reboot` the Sequoia, and then:
