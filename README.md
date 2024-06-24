@@ -25,6 +25,7 @@ Steps:
 8) Connect the Sequoia to USB for power. *IMPORTANT:* Connect it to the same device as the USB-to-UART/RS232 bridge, otherwise the power circuit could get fried
 
 <img src="Disassembly/007.JPG" width="512">
+
 *Wiring for RS232/UART interface on Parrot Sequoia main board*
 
 # Firmware downgrade
