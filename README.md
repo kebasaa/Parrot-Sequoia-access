@@ -43,6 +43,15 @@ The Parrot Sequoia is accessible through wifi on 192.168.47.1 and through USB on
   - 80 HTTP interface (to control the camera)
   - 9050 ADB shell
 
+## Button presses & LED codes
+
+- 1x short: Take a photo
+- 2x short: Enable/disable shots
+- 4x short: Turn wifi on/off
+- Long press (>3s): Shut down device
+
+For LED flashing codes, check the [manual](Manual/sequoia.pdf)
+
 ## Software access
 
 Connect the Sequoia to the USB port of a Linux computer. Check if the Sequoia connected as a USB network device. It should show up as a `usb0` device:
