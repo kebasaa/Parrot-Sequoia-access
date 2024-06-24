@@ -7,7 +7,7 @@ Information on accessing the Parrot Sequoia. Use Linux to access most easily.
 Push the button twice shortly and then once very long (10-20 sec).
 This does reset the camera for me, but does not change anything. Parrot support claims that this means you may have to replace the camera. This repository is to try to fix it, as replacing the camera is expensive after the warranty runs out (2 years).
 
-# RS232/UART interface logging of boot information
+## RS232/UART interface logging of boot information
 
 Materials:
 - USB-to-UART/RS232 bridge device
@@ -45,7 +45,21 @@ The Parrot Sequoia is accessible through wifi on 192.168.47.1 and through USB on
 
 ## Software access
 
+Connect the Sequoia to the USB port of a Linux computer. Check if the Sequoia connected as a USB network device. It should show up as a `usb0` device:
+
+```bash
+ifconfig
+```
+
+If the Linux computer does not connect, give it an ip address (you may need to do this as root):
+
+```bash
+ifconfig usb0 10.1.1.7
+```
+
 ### Enable Telnet
+
+
 
 ### ADB
 
