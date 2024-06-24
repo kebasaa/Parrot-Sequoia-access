@@ -15,7 +15,7 @@ Materials:
 - Wiring
 
 Steps:
-1) Disassemble the Parrot Sequoia (see disassembly photos)
+1) Disassemble the Parrot Sequoia (see [disassembly instructions](Disassembly/Instructions.md))
 2) Connect GND to GND
 3) Connect RX to TX, and TX to RX
 4) Reassemble the Sequoia outside of its casing.
@@ -29,7 +29,9 @@ Steps:
 
 # Firmware downgrade
 
-I NEED HELP with forcing a firmware downgrade
+The Parrot Sequoia checks the firmware version of files that are placed in its memory. If the firmware is the same or lower than that already installed, the firmware file will be deleted and nothing happens.
+
+At this point, doing a firmware downgrade does not seem possible. If anyone has information on this, I would appreciate it.
 
 ## Network map
 The Parrot Sequoia is accessible through wifi on 192.168.47.1 and through USB on 10.1.1.2.
@@ -130,3 +132,8 @@ nmap -NP 10.1.1.2
 ### Boot loader access
 
 I currently don't know how to access the boot loader exactly, or whether it's even relevant. However, it appears that the Sequoia will boot into an android-style bootloader if the button is pressed while the device gets powered on.
+
+# Credits
+
+Thanks to the following people
+* [@Peterthegreat](https://github.com/Peterthegreat)
