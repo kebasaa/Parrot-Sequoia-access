@@ -33,13 +33,13 @@ The Parrot Sequoia is accessible through wifi on 192.168.47.1 and through USB on
 
 - Open ports on WIFI (192.168.47.1)
   - 21 FTP (for data access)
-  - 22 SSH (requires an unknown root password, see below how to change it)
+  - 22 SSH (requires a root password, see below how to change it)
   - 80 HTTP interface (to control the camera)
   - 53 (unknown purpose)
   - 9050 ADB shell
 - Open ports on USB (10.1.1.2)
   - 21 FTP (for data access)
-  - 22 SSH (requires an unknown root password, see below how to change it)
+  - 22 SSH (requires a root password, see below how to change it)
   - 80 HTTP interface (to control the camera)
   - 9050 ADB shell
 
@@ -58,14 +58,6 @@ ifconfig usb0 10.1.1.7
 ```
 
 You should now be able to connect through the methods below.
-
-### File system write access
-
-To gain write access to configuration files:
-
-```bash
-mount  -o remount,rw /
-```
 
 ### ADB
 
@@ -86,6 +78,19 @@ adb shell
 ```
 
 You are now root on the Sequoia with full write permissions on the built-in Sequoia shell (Ash).
+
+If you just want to push a file, e.g. a firmware file:
+```bash
+adb push sequoia_update_171.plf /update/sequoia_update.plf
+```
+
+### File system write access
+
+To gain write access to configuration files:
+
+```bash
+mount  -o remount,rw /
+```
 
 ### Enable Telnet
 
@@ -111,13 +116,15 @@ telnet 10.1.1.2
 
 ### SSH
 
-Use ADB or Telnet to access the shell. You can now change the root password, which will give you SSH access. **WARNING:** Some processes will not work if a root password is set. Do this at your own risk:
+**_WARNING:_** Some processes will not work if a root password is set. Do this at your own risk
+
+Use ADB or Telnet to access the shell. You can now change the root password, which will give you SSH access:
 
 ```bash
 passwd
 ```
 
-Then, in a new shell, connect through SSH (example using wifi IP address):
+Then you can connect through SSH (example using wifi IP address):
 
 ```bash
 ssh -o HostKeyAlgorithms=+ssh-rsa root@192.168.47.1
@@ -136,11 +143,28 @@ Shutdown:
 sprop sys.poweroff 1
 ```
 
+Reboot:
+```bash
+reboot
+```
+
 Factory reset:
 ```bash
 /usr/bin/factory_reset_or_shutdown.sh reset
 ```
 
+View logs:
+```bash
+ulogcat -C
+```
+
+Force wifi to start:
+```bash
+ifconfig wlan0 192.168.47.1 netmask 255.255.255.0 up
+hostname Sequoia
+pstart dnsmasq_wlan0
+pstart hotspot_cfg
+```
 
 ## Firmware downgrade
 
