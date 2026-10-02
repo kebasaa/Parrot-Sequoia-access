@@ -2,6 +2,14 @@
 
 Information on accessing the Parrot Sequoia. Use Linux to access most easily.
 
+## Python library (sequoia-ctl)
+
+The [`sequoia-ctl`](sequoia-ctl/) folder contains a Python library and command-line tool to control the Sequoia from a computer (Raspberry Pi, any Linux machine, or Windows): trigger captures, configure the camera, download (and optionally delete) images, log the sunshine-sensor irradiance to CSV, adjust timestamps and run maintenance commands over telnet. See the [sequoia-ctl README](sequoia-ctl/README.md) for installation and usage.
+
+## Power
+
+**The Sequoia draws up to 2.4 A at 5 V.** Most Raspberry Pi and laptop USB ports cannot deliver this. Use a powered USB hub, a USB Y-cable or a separate 2.4 A supply, otherwise the camera may fail to boot, drop the connection or fail captures at random.
+
 ## Hardware reset
 
 Push the button twice shortly and then once very long (10-20 sec).
@@ -179,7 +187,7 @@ pstart hotspot_cfg
 
 The Parrot Sequoia checks the firmware version of files that are placed in its memory. If the firmware is the same or lower than that already installed, the firmware file will be deleted and nothing happens.
 
-At this point, doing a firmware downgrade does not seem possible. If anyone has information on this, I would appreciate it.
+**A firmware downgrade is currently not possible.** None of the methods tried so far worked (see below). If anyone has information on this, I would appreciate it.
 
 *NOTE:* The following commands trigger a firmware update (but not a downgrade)
 ```bash
@@ -187,6 +195,10 @@ pinst_trigger 1
 reboot; exit
 ```
 
+### Tried, did not work
+
+- Pushing an older firmware file (e.g. `adb push sequoia_update_171.plf /update/sequoia_update.plf`) and triggering the update with `pinst_trigger 1; reboot`: the older file is deleted and nothing happens.
+- The method a YouTube user shows [for the Parrot BeBop](https://www.youtube.com/watch?v=xzqOPS_nmi0): lowering the version number in `version.txt` via the shell, restarting, then applying the older firmware as an "update".
 ## Hardware documentation
 
 - All hardware documentation is available at [Parrot's support website](https://www.parrot.com/en/support/documentation/sequoia).
@@ -195,14 +207,8 @@ reboot; exit
 - Some information is available on the [Pix4D website](https://www.pix4d.com/product/sequoia/faq/)
 - [Some information](https://ardupilot.org/dev/docs/building-for-bebop-2.html#building-for-bebop-2) on the [linux tools](https://firmware.parrot.com/Toolchains/parrot-tools-linuxgnutools-2016.02-linaro_1.0.0-5_amd64.deb) for the BeBop2
 
-### Things to attempt:
+### Not yet tested:
 
-- A Youtube user shows how [to downgrade the firmware on his Parrot BeBop](https://www.youtube.com/watch?v=xzqOPS_nmi0). Maybe the process is similar for the Sequoia:
-  - Connect to the Sequoia via adb or SSH
-  - `vi version.txt`
-  - Reduce the version number & save
-  - Restart, then apply the firmware "update"
-  
 - Get into P7 mode: Keep the button pressed while connecting to USB (power)
   - It may be possible to do a USB firmware downgrade using a tool called *milos_linux_installer*, see [some information here](https://forum.developer.parrot.com/t/hardware-malfunction/8164/7)
   - A further discussion is happening on the [Arducopter forums](https://discuss.ardupilot.org/t/bebop2-flashing/35116/14)
