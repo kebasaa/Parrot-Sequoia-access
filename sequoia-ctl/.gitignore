@@ -1,0 +1,5 @@
+# uv environments created by the install scripts (default name "sequoia")
+/sequoia/
+/.venv/
+/sequoia_images/
+*.part

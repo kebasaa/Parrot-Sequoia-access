@@ -1,0 +1,48 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "sequoia-ctl"
+version = "0.1.0"
+description = "Control a Parrot Sequoia multispectral camera: capture, configure, download, irradiance logging"
+readme = "README.md"
+license = "GPL-3.0-or-later"
+license-files = ["LICENSE"]
+requires-python = ">=3.9"
+authors = [{ name = "kebasaa" }]
+dependencies = [
+    "requests>=2.25",
+    "tzdata; platform_system == 'Windows'",
+]
+classifiers = [
+    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+    "Programming Language :: Python :: 3",
+    "Operating System :: POSIX :: Linux",
+    "Operating System :: Microsoft :: Windows",
+    "Topic :: Scientific/Engineering :: Image Processing",
+]
+
+[project.optional-dependencies]
+ptp = [
+    "ptpy @ git+https://github.com/Parrot-Developers/sequoia-ptpy@master",
+    "construct==2.8.8",
+    "pyusb>=1.0",
+    "six>=1.10",
+]
+pillow = ["Pillow>=8"]
+
+[project.scripts]
+sequoia-ctl = "sequoia_ctl.cli:main"
+
+[dependency-groups]
+dev = ["pytest>=7", "responses>=0.23"]
+
+[tool.hatch.metadata]
+allow-direct-references = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["sequoia_ctl"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
