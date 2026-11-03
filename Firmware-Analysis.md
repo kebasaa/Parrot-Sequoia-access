@@ -27,14 +27,16 @@ be answered with the device's own logs or a decompiler, that is stated plainly.
 | **Python control** | HTTP API on :80, or PTP/IP on :15740 (`sequoia-ptpy`) | Easy–Medium |
 | Webserver bugs | `civetitf` (:80) — **no auth; `/delete` path traversal; unvalidated firmware upload** (§9) | Decompiled |
 | Capture-stops-crash | **`palermo`** capture state machine stalls with no watchdog/respawn (§10) | Decompiled |
-| Firmware downgrade | `plf_updater` gate (`update_check=up`, whitelist `1.5.9`); **no CRC/signature** (§12.1) | Medium |
+| Firmware downgrade | `plf_updater` gate (`update_check=up`, whitelist `1.5.9`) | Medium |
+| Repack / reflash | Updater checks **header + per-section CRC** (POSIX `cksum`) but **no signature** (§12.3) — recompute CRCs and it is accepted | Medium |
 
 Highest-value facts: the **interval cap is a plain-text config bound** (§8); the
 camera exposes an **unauthenticated HTTP control API** that Python can drive
-directly (§6–7); the updater does **no CRC or signature check** so a repacked PLF
-is accepted on magic + version alone (§12.1), uploadable over the network (§9);
-and the "stops taking pictures" symptom matches a **`palermo` capture-state stall
-that neither a watchdog nor `boxinit` respawn recovers** (§10).
+directly (§6–7); the updater verifies **header + per-section CRC** (POSIX `cksum`
+CRC-32) but **no signature**, so a repacked PLF is accepted once its CRCs are
+recomputed (§12.3), uploadable over the network (§9); and the "stops taking
+pictures" symptom matches a **`palermo` capture-state stall that neither a
+watchdog nor `boxinit` respawn recovers** (§10).
 
 ---
 
@@ -80,15 +82,18 @@ bytes; reproducible.
 ```
 uint32 type
 uint32 size          # payload length
-uint32 crc           # per-section checksum; NOT standard CRC-32 and NOT validated by the updater (§12.1)
+uint32 crc           # per-section checksum = POSIX cksum CRC-32; VALIDATED at install (§12.3)
 uint32 load_addr     # flash/load address (0 for rootfs entries)
 uint32 uncompressed  # if >0, payload is one gzip stream of this length
 ```
 
-Payloads padded to 4 bytes. File has **1608 sections**. The `crc` field is not a
-standard CRC-32 (tested all common variants) and — confirmed by decompiling
-`libpuf` (§12.1) — **the updater never reads or checks it**, so a repacked image
-does not need a correct section CRC to pass the update path.
+Payloads padded to 4 bytes. File has **1608 sections**. The `crc` field is the
+**POSIX `cksum` CRC-32** (poly `0x04C11DB7`, MSB-first, message length appended,
+final complement — *not* zlib/Ethernet CRC-32, which is why common-variant tests
+failed). It **is** verified: `libplfng` recomputes and checks the header CRC and
+every section's CRC when the PLF is opened for update/install, aborting on a
+mismatch (§12.3). A repacked image therefore **must** carry correct CRCs — this
+corrects the earlier §12.1 note.
 
 ### 3.3 Section inventory (observation)
 
@@ -439,18 +444,29 @@ change (§8), enabling PTP (§7.2), adding tools, and workarounds for bugs.
 
 ### Path B — Repack the `.plf` (higher risk)
 
-Needed only to ship a modified image or change kernel/bootloader. The container
-round-trips with the parser here, and the userspace updater's validation is now
-understood: **`plf_updater`/`libpuf` check only magic + platform/app id + version
-policy — no per-section CRC and no signature (§12.1).** So a repacked PLF does not
-need correct section CRCs to be accepted by the updater, and it can be delivered
-**over the network** via the unauthenticated upload handler (§9 item 3) or dropped
-straight into `/update/sequoia_update.plf`. The remaining unknown is the
-**bootloader**: the nested boot volume (§3.3) was not decompiled, so whether a
-repacked `main_boot` is CRC/signature-checked **at flash time** is still open
-(§13). A bad `main_boot` flash risks bricking, mitigated (not removed) by
-`alt_boot`. **Repack rootfs/config freely; do not flash a modified `main_boot`
-until the bootloader's flash-time validation is confirmed.**
+Needed only to ship a modified image or change kernel/bootloader. The userspace
+update/install path is now fully understood (§12.1–§12.3):
+
+- **Version gate:** `plf_updater`/`libpuf` enforce magic + platform/app id +
+  "upgrade only" version policy (bypassable via `update_check` / the `1.5.9`
+  whitelist, §12).
+- **Integrity gate:** `libplfng` (called by `libpuf`) verifies the **header CRC
+  and every section's POSIX `cksum` CRC-32**, aborting on mismatch (§12.3). So a
+  repacked PLF **must** carry correct CRCs — but the algorithm is now known and
+  reproducible, so a repack tool just recomputes them.
+- **No signature:** there is **no cryptographic authenticity check** in
+  `libpuf`/`libplfng`/`libpinst`. A correctly-CRC'd image is accepted and can be
+  delivered over the network (unauthenticated upload, §9 item 3) or dropped into
+  `/update/sequoia_update.plf`.
+
+So Path B is viable: repack, **recompute the POSIX `cksum` CRC-32 for the header
+and each changed section** (a parser/packer following §3 plus `cksum` is enough —
+no Parrot tooling needed), then install. The one residual risk is **boot-time
+secure boot** (SoC OTP/eFuse state, §12.3), not flash-time validation: a modified
+`main_boot` will flash cleanly but could still be rejected by the boot ROM if
+secure boot is fused on. **Flash a modified `main_boot` to `alt_boot` and test the
+recovery bank first; keep `main_boot` known-good until the board's OTP state is
+confirmed.**
 
 ---
 
@@ -505,21 +521,19 @@ and copies the version fields straight out of the 56-byte header. The handle
 loader (`plfng_new_from_file` → helper) just `calloc`s a 0x40 handle and reads
 the 56-byte header; **no integrity check on load.**
 
-**No CRC, no checksum verification in the update path.** `decompile-all` over
-`libpuf` produced **113 functions**; **none** contains a CRC polynomial
-(`0x04C11DB7` / `0xEDB88320` / `0x82F63B78` / `0xA001` / `0x8408`) or a
-CRC-style byte loop. `puf_check` only dispatches to the `plfng` (tar/gzip) reader
-and reads header fields. **Conclusion (observation): the updater's acceptance
-test is magic + platform/application id + version policy only — it does not
-verify the section `crc` field and contains no signature check.** This means a
-repacked PLF (Path B) does not need correct section CRCs to be accepted by
-`plf_updater`.
+**No CRC code *inside `libpuf` itself*.** `decompile-all` over `libpuf` produced
+**113 functions**; **none** contains a CRC polynomial or byte loop, and
+`puf_check` / `puf_get_version` only read header fields and the version struct.
 
-> Caveat: this covers the **userspace updater only**. The **bootloader** that
-> actually flashes `main_boot` may still verify a CRC or signature when writing
-> the partition — that binary (the nested PLF volume, §3.3) was not decompiled
-> here. Confirm before trusting a repacked flash. `alt_boot` remains the recovery
-> fallback.
+> **Correction (resolved in §12.3).** The original conclusion here — *"the
+> updater does not verify the section CRC, so a repacked PLF needs no correct
+> CRCs"* — was **wrong**, because it was scoped to `libpuf.so` alone. `libpuf`
+> does not contain CRC code because it **delegates PLF reading to `libplfng.so`**
+> (it imports `plfng_new_from_file`, `plfng_check`, `plfng_get_section_count`,
+> …). `libplfng` **does** verify the header CRC and every section's CRC, and
+> `puf_check` calls `plfng_check`. So the updater **does** enforce integrity;
+> there is still **no signature check**. See §12.3 for the decompiled proof and
+> the corrected verdict.
 
 ### 12.2 Decompiler evidence (REA + Ghidra 12.1.4, control chain)
 
@@ -548,15 +562,77 @@ Key functions cited elsewhere in this document:
 - **`siciliad`**: `client_connect_to inet:127.0.0.1:1111`, `led pomp_ctx_listen` —
   client + LED server only.
 
----
+### 12.3 Flash-time validation of `main_boot` — CRC **yes**, signature **no**
 
-## 13. Open questions / next steps
+This closes the one open repack question: *is a repacked `main_boot` CRC- or
+signature-checked when it is flashed?* Decompiled `libplfng.so` (80 funcs),
+`libpinst.so` (196 funcs) and re-read `libpuf` with REA + Ghidra 12.1.4.
 
-1. ~~Section CRC algorithm~~ — **resolved**: the updater does not validate it
-   (§12.1). Still unknown what the field's algorithm is and whether the
-   **bootloader** checks a CRC/signature at flash time.
-2. **Bootloader signature/CRC?** The nested bootloader volume (§3.3) was not
-   decompiled; decompile it to confirm whether a repacked `main_boot` is verified.
+**The install path and who checks what:**
+
+```
+plf_updater ──> libpuf (puf_check) ──> libplfng (plfng_check)   ← CRC gate
+            └─> libpinst  ── writes partitions (main_boot, …)   ← no checks
+```
+
+- **`libplfng` is a *validating* PLF reader.** `plfng_check` (export `0x113c8`)
+  first validates the header (magic `PLF!`, header/section-header sizes) and the
+  **header CRC** (for header-version ≥ 13 — this image is version `0x0d` = 13, so
+  it is enforced), then **loops over every section** calling the section
+  validator `FUN_0x10eb0`, which recomputes the section's CRC over its data and
+  compares it to the stored `crc` field; on the first mismatch it logs
+  `"bad section checksum at offset %lu"` and returns **`-EINVAL` (`-0x16`)**,
+  aborting the check. Strings: `bad header checksum: p_crc:0x%08x/crc:0x%08x`,
+  `bad section checksum at offset %lu`.
+- **`libpuf` calls `libplfng`.** `libpuf` imports `plfng_new_from_file`,
+  `plfng_check`, `plfng_get_section_count`, `plfng_extract_unixfile`; `puf_check`
+  dispatches to `plfng_check`. So the CRC gate runs as part of the updater's
+  pre-flight — it is **not** optional. (This is what §12.1 missed by decompiling
+  `libpuf` alone.)
+- **The CRC algorithm is the POSIX `cksum` CRC-32.** The primitive
+  (`FUN_0x115d0` update, `FUN_0x11600` finalize) is an MSB-first table CRC
+  (`crc = tbl[(byte ^ (crc>>24)) & 0xff] ^ (crc<<8)`) that **appends the message
+  length** and then complements (`~crc`) — the exact POSIX `cksum` definition
+  (poly `0x04C11DB7`). The same routine is exported by `plib.so` as
+  `sup_posix_crc*`. (zlib in `libplfng` is only used for `inflate`.)
+- **`libpinst` does no integrity check of its own.** It imports only
+  `fdisk_*`/`ioctl`/`open`/`fopen` — **no** CRC, signature, `plfng` or `puf`
+  symbols. It writes the partition images (to `/dev/mtd*`, UBI volumes
+  `/dev/ubi*`, or `/dev/mmcblk*`) trusting data already CRC-verified upstream.
+  No RSA/ECDSA/SHA/certificate/`verify` code exists in `libpuf`, `libplfng` or
+  `libpinst`.
+
+**Partition map** (from the install descriptor, PLF section type `0x0b`):
+`bootloader`, **`main_boot`**, `alt_boot`, `misc_boot` are raw boot banks
+(main/alt are the A/B pair); `system`, `factory`, `cache`, `data` are UBI
+volumes. `main_boot`'s image is carried in the outer PLF (one of the nested
+`PLF!` boot volumes, section types `0x03`/`0x0c`), whose bytes are covered by the
+section CRC that `plfng_check` verifies before `libpinst` writes them.
+
+**Verdict.** A repacked `main_boot` **is CRC-checked at flash time** — a stale or
+wrong section/header CRC is rejected with `-EINVAL` before anything is written —
+but it is **not signature-checked**. So a repack is accepted **iff** you
+recompute the POSIX `cksum` CRC-32 for the header and each modified section;
+there is no cryptographic authenticity gate in the userspace updater/installer
+to stop a correctly-CRC'd image.
+
+> Remaining boundary (not flash-time): whether the **SoC boot ROM / u-boot
+> verifies a signature at *boot* time** (secure boot) is a separate question
+> governed by **OTP/eFuse** state on the specific board, which cannot be read
+> from the firmware image. The presence of `flash_otp_dump` / `flash_otp_write` /
+> `flash_otp_lock` in `/usr/sbin` shows the P7 SoC *supports* OTP-fused secure
+> boot, but not whether it is *enabled*. If secure boot is fused on, a modified
+> `main_boot` would flash cleanly (CRC ok) yet be rejected by the ROM at boot —
+> test on `alt_boot` first.
+
+1. ~~Section CRC algorithm~~ — **resolved (§12.3)**: it is the **POSIX `cksum`
+   CRC-32** (poly `0x04C11DB7`, length-appended, complemented), and it **is**
+   verified by `libplfng` at install — correcting the earlier §12.1 note.
+2. ~~Flash-time CRC/signature on `main_boot`~~ — **resolved (§12.3)**: CRC
+   **yes** (header + every section, via `libplfng`/`plfng_check`), signature
+   **no**. A repacked image passes iff its CRCs are recomputed. The only
+   remaining boot-chain unknown is **boot-time secure boot** (SoC OTP/eFuse
+   state), which cannot be read from the image — test on `alt_boot` on hardware.
 3. **CivetWeb version + CVEs** — version is a runtime macro, not a static string;
    get it from the live `Server:` banner (`curl -I http://10.1.1.2/`).
 4. ~~`civetitf`/`siciliad` input-validation bugs~~ — **done (§9, §12.2)**:
@@ -579,9 +655,11 @@ Key functions cited elsewhere in this document:
 > **Hopper 6.6.1** both detected healthy. The only issue was that the MCP server
 > launches bare `npx`, which was not on the login `PATH`; `npx` exists via nvm
 > (`~/.nvm/versions/node/v22.23.4/bin`) and has been added to `~/.profile`, so the
-> REA MCP tools should connect after a desktop-app restart. All findings in §12.1
-> and §12.2 were produced with the REA **CLI** (`decompile-all --provider ghidra`).
-> Item 2 (bootloader flash-time validation) is the natural next decompile target.
+> REA MCP tools connect after a desktop-app restart (confirmed: the MCP server is
+> now reachable). Findings in §12.1–§12.3 and §9–§10 were produced with REA +
+> Ghidra 12.1.4. The remaining decompile-reachable items are the live CivetWeb
+> version (item 3) and a PLF-version diff (item 8); boot-time secure boot (item 2)
+> needs the hardware's OTP state, not the image.
 
 ---
 
