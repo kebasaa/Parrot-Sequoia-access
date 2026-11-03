@@ -460,8 +460,9 @@ update/install path is now fully understood (§12.1–§12.3):
   `/update/sequoia_update.plf`.
 
 So Path B is viable: repack, **recompute the POSIX `cksum` CRC-32 for the header
-and each changed section** (a parser/packer following §3 plus `cksum` is enough —
-no Parrot tooling needed), then install. The one residual risk is **boot-time
+and each changed section**, then install. This is implemented and tested in
+**[`tools/plf.py`](tools/plf.py)** (`replace-file` / `set-version` / `fixcrc`,
+then `verify`); no Parrot tooling needed. The one residual risk is **boot-time
 secure boot** (SoC OTP/eFuse state, §12.3), not flash-time validation: a modified
 `main_boot` will flash cleanly but could still be rejected by the boot ROM if
 secure boot is fused on. **Flash a modified `main_boot` to `alt_boot` and test the
@@ -663,10 +664,20 @@ to stop a correctly-CRC'd image.
 
 ---
 
-## 14. Reproducibility
+## 14. Reproducibility & tooling
 
-Two dependency-free Python scripts parse and extract the container: a
-header/section walker and an extractor that rebuilds the rootfs and dumps the
-nested binary volumes. The PLF layout in §3 is enough to re-implement both. No
-`binwalk`/`plftool` needed. (Scripts live in the analysis scratchpad; they can be
-committed to the repo on request.)
+Dependency-free Python tooling for the container lives in **[`tools/`](tools/)**
+(see [`tools/README.md`](tools/README.md)):
+
+- **[`tools/plf.py`](tools/plf.py)** — parse, `info`, `verify`, `extract`,
+  `replace-file`, `set-version`, `fixcrc`, and `selftest`. It implements the PLF
+  format (§3) and the exact header + per-section **POSIX `cksum` CRC-32** model
+  the updater enforces (§12.3), so a repacked image is accepted by `plf_updater`.
+  Validated byte-for-byte against the stock 1.7.1 image: all 1608 section CRCs
+  and the header CRC reproduce exactly, and a no-change round-trip is
+  bit-identical. `plf.py selftest <stock.plf>` re-proves this on any machine.
+
+No `binwalk`/`plftool` needed. For flashing a built image to the camera, follow
+the **[`Reflash-Runbook.md`](Reflash-Runbook.md)** (OTP secure-boot check,
+full backups, rootfs-only path with no boot risk, and an `alt_boot`-first
+procedure for boot changes).
